@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# specific
+build/
+gcc/gcc-i386-elf/

@@ -1,34 +1,50 @@
-SRCDIR = src
+include makeTools/Makefile
+
+
 BUILDDIR = build
 
-KERNELDIR = $(SRCDIR)/kernel
-BOOTDIR = $(SRCDIR)/boot
+TARGET = $(BUILDDIR)/os-image.img
 
-GCCDIR = gcc/gcc-i386-elf
+KERNELBUILD = kernel/build
+KERNELBIN = $(KERNELBUILD)/kernel.bin
 
-CFLAGS = -ffreestanding -fno-stack-protector -m32
+BOOTLOADERBUILD = bootloader/build
+BOOTLOADER = $(BOOTLOADERBUILD)/boot_sect.bin
 
-all: $(BUILDDIR)/os-image
+all: ChildrenMake $(TARGET)
 
-$(BUILDDIR)/boot_sect.bin: $(BOOTDIR)/boot_sect.asm
-	nasm -f bin -o $(BUILDDIR)/boot_sect.bin $(BOOTDIR)/boot_sect.asm -I $(BOOTDIR)/ -I $(SRCDIR)/asm_tools/
+#$(BUILDDIR)/kernel_entry.o: $(KERNELDIR)/kernel_entry.asm
+#	nasm -f elf -o $(BUILDDIR)/kernel_entry.o $(KERNELDIR)/kernel_entry.asm
 
-$(BUILDDIR)/kernel_entry.o: $(KERNELDIR)/kernel_entry.asm
-	nasm -f elf -o $(BUILDDIR)/kernel_entry.o $(KERNELDIR)/kernel_entry.asm
+#$(BUILDDIR)/kernel.o: $(KERNELDIR)/kernel.cpp
+#	${GCCDIR}/bin/i386-elf-g++ $(CFLAGS) -c $(KERNELDIR)/kernel.cpp -o $(BUILDDIR)/kernel.o 
 
-$(BUILDDIR)/kernel.o: $(KERNELDIR)/kernel.c
-	${GCCDIR}/bin/i386-elf-g++ $(CFLAGS) -c $(KERNELDIR)/kernel.c -o $(BUILDDIR)/kernel.o 
+#$(BUILDDIR)/kernel.bin: $(BUILDDIR)/kernel_entry.o $(BUILDDIR)/kernel.o
+#	${GCCDIR}/bin/i386-elf-ld -o $(BUILDDIR)/kernel.bin -Ttext 0x1000 $(BUILDDIR)/kernel_entry.o $(BUILDDIR)/kernel.o --oformat binary
+#	# write 15 sectors of 0s to kernel.bin
+#	dd if=/dev/zero of=$(BUILDDIR)/kernel.bin bs=512 count=15 seek=1
 
-$(BUILDDIR)/kernel.bin: $(BUILDDIR)/kernel_entry.o $(BUILDDIR)/kernel.o
-	${GCCDIR}/bin/i386-elf-ld -o $(BUILDDIR)/kernel.bin -Ttext 0x1000 $(BUILDDIR)/kernel_entry.o $(BUILDDIR)/kernel.o --oformat binary
-	# write 15 sectors of 0s to kernel.bin
-	dd if=/dev/zero of=$(BUILDDIR)/kernel.bin bs=512 count=15 seek=1
+ChildrenMake:
+	cd kernel; make
+	cd bootloader; make
 
-$(BUILDDIR)/os-image: $(BUILDDIR)/boot_sect.bin $(BUILDDIR)/kernel.bin
-	cat $(BUILDDIR)/boot_sect.bin $(BUILDDIR)/kernel.bin > $(BUILDDIR)/os-image
+
+$(TARGET): $(BOOTLOADER) $(KERNELBIN)
+	cat $(BOOTLOADER) $(KERNELBIN) > $(TARGET)
+
 
 clean:
-	rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)/*.o
+	rm -rf $(BUILDDIR)/*.bin
+
+	rm -rf $(KERNELBUILD)/*.o
+	rm -rf $(KERNELBUILD)/*.bin
+
+	rm -rf $(BOOTLOADERBUILD)/*.o
+	rm -rf $(BOOTLOADERBUILD)/*.bin
 
 run: clean all
-	qemu-system-x86_64 $(BUILDDIR)/os-image
+	qemu-system-x86_64 $(TARGET)
+
+debug: clean all
+	qemu-system-x86_64 -s -S $(TARGET)

@@ -3,7 +3,7 @@ include ../makeTools/Makefile
 SRCDIR = src
 BUILDDIR = build
 
-SRC = $(SRCDIR)/kernel.c $(SRCDIR)/VideoMemory/VideoMemory.c
+SRC = $(SRCDIR)/kernel.cpp $(SRCDIR)/VideoMemory/VideoMemory.cpp
 OBJ = $(BUILDDIR)/kernel.o $(BUILDDIR)/VideoMemory.o
 
 all: $(SRC) $(BUILDDIR)/disk.img
@@ -19,8 +19,8 @@ $(BUILDDIR)/kernel_entry.o: $(SRCDIR)/kernel_entry.asm
 	nasm -f elf -o $(BUILDDIR)/kernel_entry.o $(SRCDIR)/kernel_entry.asm
 
 $(BUILDDIR)/kernel.o:
-	$(CXX32) $(CFLAGS) -o $(BUILDDIR)/kernel.o -c $(SRCDIR)/kernel.c
+	$(CXX32) $(CFLAGS) -o $(BUILDDIR)/kernel.o -c $(SRCDIR)/kernel.cpp
 
 $(BUILDDIR)/VideoMemory.o:
-	$(CXX32) $(CFLAGS) -o $(BUILDDIR)/VideoMemory.o -c $(SRCDIR)/VideoMemory/VideoMemory.c
+	$(CXX32) $(CFLAGS) -o $(BUILDDIR)/VideoMemory.o -c $(SRCDIR)/VideoMemory/VideoMemory.cpp
 

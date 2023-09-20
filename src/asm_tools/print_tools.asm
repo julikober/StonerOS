@@ -14,7 +14,7 @@ print_string16:               ; dx = string
 print_hex16:                  ; dx = number, cx = number of bytes
 	push dx
 	mov dx, hex_prefix
-	call print_string
+	call print_string16
 	
 	pop dx
 	imul cx, 8

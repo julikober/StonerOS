@@ -18,7 +18,4 @@ init_pm:
 	mov gs, ax
 	mov ss, ax                   ; set all segment registers to DATA_SEG
 	
-	mov esp, 0x90000
-	mov ebp, esp                 ; set stack pointer to 0x90000
-	
-	call main                    ; call main function
+	ret

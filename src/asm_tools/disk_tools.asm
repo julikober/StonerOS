@@ -18,7 +18,7 @@ load_disk:                    ; dx = disk number, al = number of sectors to read
 	
 disk_error:
 	mov dx, DISK_ERROR_MSG
-	call print_string16
+	; call print_string16
 	jmp $
 	
 DISK_ERROR_MSG: db "Disk read error!", 0
